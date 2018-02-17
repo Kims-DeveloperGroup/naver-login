@@ -4,7 +4,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.openqa.selenium.WebDriver;
 
-public class PageCrawler {
+public class NaverPageCrawler {
 
     public Document getDocument(WebDriver webDriver, String targetUrl) {
         webDriver.get(targetUrl);

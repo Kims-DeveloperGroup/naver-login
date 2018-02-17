@@ -7,9 +7,9 @@ import org.openqa.selenium.chrome.ChromeDriver;
 
 import static org.junit.Assert.assertEquals;
 
-public class PageCrawlerTest {
+public class NaverPageCrawlerTest {
 
-    private final PageCrawler pageCrawler = new PageCrawler();
+    private final NaverPageCrawler naverPageCrawler = new NaverPageCrawler();
     private final WebDriver webDriver = new ChromeDriver();
 
     @Test
@@ -19,7 +19,7 @@ public class PageCrawlerTest {
         String expectedTitle = "naver";
 
         //When
-        Document document = pageCrawler.getDocument(webDriver, targetUrl);
+        Document document = naverPageCrawler.getDocument(webDriver, targetUrl);
 
         //Then
         assertEquals(expectedTitle, document.title().toLowerCase());

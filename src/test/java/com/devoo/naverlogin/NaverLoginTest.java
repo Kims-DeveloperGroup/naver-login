@@ -9,7 +9,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-public class LoginTest {
+public class NaverLoginTest {
 
     private final String ID = "CREDENTIAL";
     private final String PASSWORD = "CREDENTIAL";
@@ -17,11 +17,11 @@ public class LoginTest {
     @Test
     public void shouldBeLoginUserInfoSectionFound_whenLoginSucceeds() {
         //Given
-        Login login = new Login();
+        NaverLogin naverLogin = new NaverLogin();
         String loginUserInfoElementClassName = "section_minime";
 
         //When
-        WebDriver webDriver = login.tryLogin(ID, PASSWORD);
+        WebDriver webDriver = naverLogin.tryLogin(ID, PASSWORD);
         List<WebElement> spans = webDriver.findElements(By.tagName("span"));
 
         //Then

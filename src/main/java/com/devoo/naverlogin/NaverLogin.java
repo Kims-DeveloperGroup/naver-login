@@ -6,7 +6,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-public class Login {
+public class NaverLogin {
 
     private final String NAVER_HOME_URL = "https://www.naver.com/";
     private final String LOGIN_BUTTON_SELECTOR = "#frmNIDLogin fieldset .btn_login input";

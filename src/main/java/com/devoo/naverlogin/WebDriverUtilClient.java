@@ -27,7 +27,7 @@ public class WebDriverUtilClient {
         this.webDriver.get(url);
     }
 
-    public Document getPageDocuemnt(String pageUrl) {
+    public Document getPageDocument(String pageUrl) {
         webDriver.get(pageUrl);
         return Jsoup.parse(this.webDriver.getPageSource());
     }
@@ -43,5 +43,9 @@ public class WebDriverUtilClient {
         this.webDriver.get(pageUrl);
         this.webDriver.switchTo().frame(iframeName);
         return Jsoup.parse(this.webDriver.getPageSource());
+    }
+
+    public void closeAlert() {
+        this.webDriver.switchTo().alert().dismiss();
     }
 }

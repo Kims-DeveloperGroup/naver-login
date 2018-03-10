@@ -13,7 +13,7 @@ public class HowToRun {
     public void logInAndGetDocumentFromTargetUrl() throws NaverLoginFailException {
         NaverClient naverClient = new NaverClient();
         naverClient.tryLogin("userId", "password");
-        Document pageDocuemnt = naverClient.getPageDocuemnt("http://www.naver.com");
+        Document pageDocuemnt = naverClient.getPageDocument("http://www.naver.com");
         System.out.println(pageDocuemnt.title());
     }
 

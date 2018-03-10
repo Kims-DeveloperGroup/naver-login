@@ -11,8 +11,8 @@ _possible erorr message: "The path to the driver executable must be set by the w
     public void logInAndGetDocumentFromTargetUrl() throws NaverLoginFailException {
             NaverClient naverClient = new NaverClient();
             naverClient.tryLogin("userId", "password");
-            Document pageDocuemnt = naverClient.getPageDocuemnt("http://www.naver.com");
-            System.out.println(pageDocuemnt.title());
+            Document pageDocument = naverClient.getPageDocument("http://www.naver.com");
+            System.out.println(pageDocument.title());
     }
     public void getDocuemntofIframe() {
             NaverClient naverClient = new NaverClient();

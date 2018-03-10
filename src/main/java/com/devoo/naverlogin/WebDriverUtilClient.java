@@ -27,7 +27,7 @@ public class WebDriverUtilClient {
         this.webDriver.get(url);
     }
 
-    public Document getPageDocuemnt(String pageUrl) {
+    public Document getPageDocument(String pageUrl) {
         webDriver.get(pageUrl);
         return Jsoup.parse(this.webDriver.getPageSource());
     }

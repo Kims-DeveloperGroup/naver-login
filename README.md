@@ -30,7 +30,7 @@ repositories {
 			maven { url 'https://jitpack.io' }
 		}
 dependencies {
-	        compile 'com.github.Kims-DeveloperGroup:naver-login:-SNAPSHOT'
+	        compile 'com.github.Kims-DeveloperGroup:naver-login:v0.0.1-ML-1'
 	}
 ```
 
@@ -46,6 +46,6 @@ dependencies {
 <dependency>
 	    <groupId>com.github.Kims-DeveloperGroup</groupId>
 	    <artifactId>naver-login</artifactId>
-	    <version>-SNAPSHOT</version>
+	    <version>v0.0.1-ML-1</version>
 	</dependency>
 ```

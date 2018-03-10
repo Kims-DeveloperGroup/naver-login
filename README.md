@@ -8,11 +8,16 @@ _possible erorr message: "The path to the driver executable must be set by the w
 - ### HOW-TO-RUN
  _Get a html document from a target url from naver main page after logged in._
 ```
-    public void logInAndGetDocumentFromTargetUrl() {
-        NaverLogin naverLogin = new NaverLogin();
-        WebDriver loggedInWebDriver = naverLogin.tryLogin("userId", "password");
-        NaverPageCrawler naverPageCrawler = new NaverPageCrawler();
-        Document document = naverPageCrawler.getDocument(loggedInWebDriver, "https://www.naver.com");
+    public void logInAndGetDocumentFromTargetUrl() throws NaverLoginFailException {
+            NaverClient naverClient = new NaverClient();
+            naverClient.tryLogin("userId", "password");
+            Document pageDocuemnt = naverClient.getPageDocuemnt("http://www.naver.com");
+            System.out.println(pageDocuemnt.title());
+    }
+    public void getDocuemntofIframe() {
+            NaverClient naverClient = new NaverClient();
+            Document iframeDocument = naverClient.getIframe("http://www.naver.com", "iframeNameOrId");
+            System.out.println(iframeDocument.title());
     }
 ```
 

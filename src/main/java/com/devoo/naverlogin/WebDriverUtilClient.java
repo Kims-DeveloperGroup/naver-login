@@ -44,4 +44,8 @@ public class WebDriverUtilClient {
         this.webDriver.switchTo().frame(iframeName);
         return Jsoup.parse(this.webDriver.getPageSource());
     }
+
+    public void closeAlert() {
+        this.webDriver.switchTo().alert().dismiss();
+    }
 }

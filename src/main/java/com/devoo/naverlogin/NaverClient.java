@@ -2,35 +2,28 @@ package com.devoo.naverlogin;
 
 import com.devoo.naverlogin.exception.NaverLoginFailException;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class NaverClient {
+public class NaverClient extends WebDriverUtilClient {
     static final String LOGIN_USERINFO_ELEMENT_CLASSNAME = "section_minime";
 
     private final String NAVER_HOME_URL = "https://www.naver.com/";
     private final String LOGIN_BUTTON_SELECTOR = "#frmNIDLogin fieldset .btn_login input";
     private String LOGIN_FORM_ID = "frmNIDLogin";
     private WebDriver webDriver;
-    private List<String> windowHandles;
 
     public NaverClient() {
-        this.webDriver = new ChromeDriver();
+        super(new ChromeDriver());
+        this.webDriver = super.getWebDriver();
     }
 
     public NaverClient(WebDriver webDriver) {
-        this.webDriver = webDriver;
-    }
-
-    public WebDriver getWebDriver() {
-        return this.webDriver;
+        super(webDriver);
+        this.webDriver = super.getWebDriver();
     }
 
     public NaverClient tryLogin(String id, String password) throws NaverLoginFailException {
@@ -43,14 +36,6 @@ public class NaverClient {
         if (!isLoginSucceeded()) {
             throw new NaverLoginFailException();
         }
-        return this;
-    }
-
-    public NaverClient openNewTab(String url) {
-        ((JavascriptExecutor)webDriver).executeScript("window.open()");
-        this.windowHandles = new ArrayList<>(this.webDriver.getWindowHandles());
-        this.webDriver.switchTo().window(windowHandles.get(windowHandles.size()-1));
-        this.webDriver.get(url);
         return this;
     }
 

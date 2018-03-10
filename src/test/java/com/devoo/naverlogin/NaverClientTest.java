@@ -14,8 +14,8 @@ import static org.junit.Assert.assertNotNull;
 
 public class NaverClientTest {
 
-    private final String ID = "th1nk";
-    private final String PASSWORD = "rNVKFL!12";
+    private final String ID = "CREDENTIAL";
+    private final String PASSWORD = "CREDENTIAL";
     private final String naverMainUrl = "https://www.naver.com";
 
     @Test

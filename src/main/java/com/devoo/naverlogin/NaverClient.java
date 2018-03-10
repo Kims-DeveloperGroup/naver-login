@@ -9,11 +9,10 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NaverLogin {
+public class NaverClient {
     static final String LOGIN_USERINFO_ELEMENT_CLASSNAME = "section_minime";
 
     private final String NAVER_HOME_URL = "https://www.naver.com/";
@@ -22,11 +21,11 @@ public class NaverLogin {
     private WebDriver webDriver;
     private List<String> windowHandles;
 
-    public NaverLogin() {
+    public NaverClient() {
         this.webDriver = new ChromeDriver();
     }
 
-    public NaverLogin(WebDriver webDriver) {
+    public NaverClient(WebDriver webDriver) {
         this.webDriver = webDriver;
     }
 
@@ -34,7 +33,7 @@ public class NaverLogin {
         return this.webDriver;
     }
 
-    public NaverLogin tryLogin(String id, String password) throws NaverLoginFailException {
+    public NaverClient tryLogin(String id, String password) throws NaverLoginFailException {
         this.webDriver.get(NAVER_HOME_URL);
         new WebDriverWait(this.webDriver, 5)
                 .until(ExpectedConditions.visibilityOfElementLocated(By.id(LOGIN_FORM_ID)));
@@ -47,7 +46,7 @@ public class NaverLogin {
         return this;
     }
 
-    public NaverLogin openNewTab(String url) {
+    public NaverClient openNewTab(String url) {
         ((JavascriptExecutor)webDriver).executeScript("window.open()");
         this.windowHandles = new ArrayList<>(this.webDriver.getWindowHandles());
         this.webDriver.switchTo().window(windowHandles.get(windowHandles.size()-1));

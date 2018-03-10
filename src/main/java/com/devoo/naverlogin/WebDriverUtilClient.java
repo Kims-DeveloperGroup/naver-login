@@ -18,11 +18,10 @@ public class WebDriverUtilClient {
         return this.webDriver;
     }
 
-    public WebDriverUtilClient openNewTab(String url) {
+    public void openNewTab(String url) {
         ((JavascriptExecutor) webDriver).executeScript("window.open()");
         this.windowHandles = new ArrayList<>(this.webDriver.getWindowHandles());
         this.webDriver.switchTo().window(windowHandles.get(windowHandles.size() - 1));
         this.webDriver.get(url);
-        return this;
     }
 }

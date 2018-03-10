@@ -1,5 +1,7 @@
 package com.devoo.naverlogin;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 
@@ -23,5 +25,23 @@ public class WebDriverUtilClient {
         this.windowHandles = new ArrayList<>(this.webDriver.getWindowHandles());
         this.webDriver.switchTo().window(windowHandles.get(windowHandles.size() - 1));
         this.webDriver.get(url);
+    }
+
+    public Document getPageDocuemnt(String pageUrl) {
+        webDriver.get(pageUrl);
+        return Jsoup.parse(this.webDriver.getPageSource());
+    }
+
+    /**
+     * Gets document of iframe
+     *
+     * @param pageUrl    page url of iframe
+     * @param iframeName iframe name or id to crawl
+     * @return document of iframe
+     */
+    public Document getIframe(String pageUrl, String iframeName) {
+        this.webDriver.get(pageUrl);
+        this.webDriver.switchTo().frame(iframeName);
+        return Jsoup.parse(this.webDriver.getPageSource());
     }
 }

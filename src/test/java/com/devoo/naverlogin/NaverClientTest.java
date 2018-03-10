@@ -1,17 +1,22 @@
 package com.devoo.naverlogin;
 
 import com.devoo.naverlogin.exception.NaverLoginFailException;
+import org.jsoup.nodes.Document;
 import org.junit.Test;
-import org.openqa.selenium.*;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class NaverClientTest {
 
     private final String ID = "th1nk";
     private final String PASSWORD = "rNVKFL!12";
+    private final String naverMainUrl = "https://www.naver.com";
 
     @Test
     public void shouldBeLoginUserInfoSectionFound_whenLoginSucceeds() throws NaverLoginFailException {
@@ -47,11 +52,20 @@ public class NaverClientTest {
         WebDriver webDriver = naverClient.tryLogin(ID, PASSWORD).getWebDriver();
 
         //When
-        String naverMainUrl = "https://www.naver.com";
         naverClient.openNewTab(naverMainUrl);
 
         //Then
         assertEquals(webDriver.findElement(By.id("account"))
                 .getAttribute("class"), loginUserInfoElementClassName);
+    }
+
+    @Test
+    public void shouldBeDocumentInsideIframeRetrieved() {
+        //Given
+        NaverClient naverClient = new NaverClient();
+        //When
+        Document da_iframe_rolling = naverClient.getIframe(naverMainUrl, "da_iframe_rolling");
+        //then
+        assertNotNull(da_iframe_rolling.body());
     }
 }

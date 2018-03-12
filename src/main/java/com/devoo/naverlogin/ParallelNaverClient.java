@@ -25,10 +25,14 @@ public class ParallelNaverClient<T, R> {
         while (true) {
             NaverClientRunner naverClientRunner = runners.pollAvailableClient();
             executorService.submit(naverClientRunner);
-            if (stop == true) {
+            if (this.stop == true && this.queue.isEmpty()) {
                 break;
             }
         }
+    }
+
+    public void stop() {
+        this.stop = true;
     }
 
     private class NaverClientRunners {

@@ -1,10 +1,10 @@
 package com.devoo.naverlogin;
 
+import com.devoo.naverlogin.runner.ClientAction;
 import org.junit.Test;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.function.Function;
 
 import static org.junit.Assert.fail;
 
@@ -19,7 +19,7 @@ public class ParallelNaverClientTest {
         for (int i = 0; i < 1000; i++) {
             inputs.add(String.valueOf(i));
         }
-        Function<String, String> function = s -> s;
+        ClientAction<String, String> function = (s, client) -> s;
 
         //When
         ParallelNaverClient<String, String> parallelNaverClient = new ParallelNaverClient<>(3, inputs,

@@ -1,12 +1,12 @@
 package com.devoo.naverlogin;
 
+import com.devoo.naverlogin.runner.ClientAction;
 import com.devoo.naverlogin.runner.NaverClientRunner;
 import com.devoo.naverlogin.runner.NaverClientRunners;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 
 import static java.util.concurrent.Executors.newFixedThreadPool;
 
@@ -17,7 +17,7 @@ public class ParallelNaverClient<T, R> implements Runnable {
 
     private boolean stop = false;
 
-    public ParallelNaverClient(int parallel, BlockingQueue<T> inputQueue, Function<T, R> function,
+    public ParallelNaverClient(int parallel, BlockingQueue<T> inputQueue, ClientAction<T, R> function,
                                BlockingQueue<R> outputQueue) {
         executorService = newFixedThreadPool(parallel);
         this.inputQueue = inputQueue;

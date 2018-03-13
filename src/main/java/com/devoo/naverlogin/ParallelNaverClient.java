@@ -22,13 +22,18 @@ public class ParallelNaverClient<T, R> {
     }
 
     public void start() throws InterruptedException {
+        long start = System.currentTimeMillis();
         while (true) {
             NaverClientRunner naverClientRunner = runners.pollAvailableClient();
             executorService.submit(naverClientRunner);
-            if (this.stop == true && this.queue.isEmpty()) {
+            if (this.queue.isEmpty()) {
                 break;
             }
         }
+        long end = System.currentTimeMillis();
+        long duration = (end - start) / 1000;
+        System.out.println("시간: " + duration + " 초");
+
     }
 
     public void stop() {
@@ -42,12 +47,15 @@ public class ParallelNaverClient<T, R> {
             for (int count = 0; count < clientRunnerCount; count++) {
                 this.clientRunners.add(new NaverClientRunner(queue, "runner-" + count));
             }
+            System.out.println("NaverClientRunner initialized");
         }
 
         public NaverClientRunner pollAvailableClient() {
+            System.out.println("waiting for runner");
             while (true) {
                 for (NaverClientRunner runner : clientRunners) {
                     if (runner.lockIfAvailable()) {
+                        System.out.println(runner.name + " is available.");
                         return runner;
                     }
                 }
@@ -76,7 +84,11 @@ public class ParallelNaverClient<T, R> {
         }
 
         public void unlock() {
-            lock.compareAndSet(1, 0);
+            if (lock.compareAndSet(1, 0)) {
+                System.out.println(name + " is unlocked.");
+            } else {
+                System.out.println(name + " is already unlocked. wtf");
+            }
         }
 
         @Override

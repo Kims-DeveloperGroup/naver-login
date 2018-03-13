@@ -6,20 +6,22 @@ import com.devoo.naverlogin.runner.NaverClientRunners;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 import static java.util.concurrent.Executors.newFixedThreadPool;
 
 public class ParallelNaverClient<T, R> implements Runnable {
     private final ExecutorService executorService;
-    private final NaverClientRunners runners;
+    private final NaverClientRunners<T, R> runners;
     private BlockingQueue<T> inputQueue;
 
     private boolean stop = false;
 
-    public ParallelNaverClient(int parallel, BlockingQueue<T> inputQueue) {
+    public ParallelNaverClient(int parallel, BlockingQueue<T> inputQueue, Function<T, R> function,
+                               BlockingQueue<R> outputQueue) {
         executorService = newFixedThreadPool(parallel);
         this.inputQueue = inputQueue;
-        this.runners = new NaverClientRunners(parallel, this.inputQueue);
+        this.runners = new NaverClientRunners(parallel, this.inputQueue, function, outputQueue);
     }
 
     public void start() throws Exception {

@@ -2,13 +2,19 @@ package com.devoo.naverlogin.runner;
 
 import java.util.LinkedList;
 import java.util.concurrent.BlockingQueue;
+import java.util.function.Function;
 
-public class NaverClientRunners<T> {
-    private LinkedList<NaverClientRunner> clientRunners = new LinkedList<>();
+public class NaverClientRunners<I, R> {
+    private final BlockingQueue<R> outputQueue;
+    private LinkedList<NaverClientRunner<I, R>> clientRunners = new LinkedList<>();
 
-    public NaverClientRunners(int clientRunnerCount, BlockingQueue<T> queue) {
+    public NaverClientRunners(int clientRunnerCount, BlockingQueue<I> inputQueue,
+                              Function<I, R> function,
+                              BlockingQueue<R> outputQueue) {
+        this.outputQueue = outputQueue;
         for (int count = 0; count < clientRunnerCount; count++) {
-            this.clientRunners.add(new NaverClientRunner(queue, "runner-" + count));
+            this.clientRunners.add(new NaverClientRunner(inputQueue,
+                    "runner-" + count, function, outputQueue));
         }
         System.out.println("NaverClientRunner initialized");
     }

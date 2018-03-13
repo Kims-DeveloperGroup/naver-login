@@ -5,16 +5,24 @@ import org.junit.Test;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import static org.junit.Assert.fail;
+
 public class ParallelNaverClientTest {
 
     @Test
-    public void test() throws InterruptedException {
-        BlockingQueue<String> queue = new LinkedBlockingQueue<>();
+    public void shouldClientDequeAllItemsFromInputs() throws Exception {
+        //Given
+        BlockingQueue<String> inputs = new LinkedBlockingQueue<>();
         for (int i = 0; i < 1000; i++) {
-            queue.add(String.valueOf(i));
+            inputs.add(String.valueOf(i));
         }
-        ParallelNaverClient<String, String> parallelNaverClient = new ParallelNaverClient<>(3, queue);
+        //When
+        ParallelNaverClient<String, String> parallelNaverClient = new ParallelNaverClient<>(3, inputs);
         parallelNaverClient.start();
-    }
 
+        //Then
+        if (!inputs.isEmpty()) {
+            fail("all items are not consumed.");
+        }
+    }
 }

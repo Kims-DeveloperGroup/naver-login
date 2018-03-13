@@ -52,6 +52,7 @@ public class ParallelNaverClientTest {
         parallelNaverClient.startAsyn();
         Thread.sleep(50);
         parallelNaverClient.stop();
+        Thread.sleep(5000);
 
         //Then
         if (inputs.isEmpty()) {

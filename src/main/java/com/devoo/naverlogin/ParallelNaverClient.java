@@ -4,40 +4,57 @@ import java.util.LinkedList;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.concurrent.Executors.newFixedThreadPool;
 
-public class ParallelNaverClient<T, R> {
+public class ParallelNaverClient<T, R> implements Runnable {
     private final ExecutorService executorService;
     private final NaverClientRunners runners;
-    private BlockingQueue<T> queue;
+    private BlockingQueue<T> inputQueue;
 
     private boolean stop = false;
 
-    public ParallelNaverClient(int parallel, BlockingQueue<T> queue) {
+    public ParallelNaverClient(int parallel, BlockingQueue<T> inputQueue) {
         executorService = newFixedThreadPool(parallel);
-        this.queue = queue;
-        this.runners = new NaverClientRunners(parallel, this.queue);
+        this.inputQueue = inputQueue;
+        this.runners = new NaverClientRunners(parallel, this.inputQueue);
     }
 
-    public void start() throws InterruptedException {
+    public void start() throws Exception {
+        this.run();
+    }
+
+    public void startAsyn() {
+        new Thread(this).start();
+    }
+
+    public void stop() {
+        System.out.println("sent stop request.");
+        this.stop = true;
+    }
+
+    @Override
+    public void run() {
         long start = System.currentTimeMillis();
         while (true) {
             NaverClientRunner naverClientRunner = runners.pollAvailableClient();
             executorService.submit(naverClientRunner);
-            if (this.queue.isEmpty()) {
+            if (this.inputQueue.isEmpty() || this.stop) {
+                System.out.println("Stopping....:" + this.inputQueue.size() + " items remain");
+                try {
+                    executorService.awaitTermination(3, TimeUnit.SECONDS);
+                    runners.terminate();
+                } catch (InterruptedException e) {
+                    break;
+                }
                 break;
             }
         }
         long end = System.currentTimeMillis();
         long duration = (end - start) / 1000;
         System.out.println("시간: " + duration + " 초");
-
-    }
-
-    public void stop() {
-        this.stop = true;
     }
 
     private class NaverClientRunners {
@@ -62,9 +79,14 @@ public class ParallelNaverClient<T, R> {
                 continue;
             }
         }
+
+        public void terminate() {
+            clientRunners.forEach(runner -> runner.terminate());
+        }
+
     }
 
-    private class NaverClientRunner implements Callable<R> {
+    private class NaverClientRunner<T, R> implements Callable {
         private String name;
         private NaverClient naverClient = new NaverClient();
         private BlockingQueue<T> queue;
@@ -91,10 +113,18 @@ public class ParallelNaverClient<T, R> {
             }
         }
 
+        public void terminate() {
+            naverClient.getWebDriver().close();
+            System.out.println(name + " terminated.");
+        }
+
         @Override
         public R call() throws Exception {
-            T item = queue.take();
-            System.out.println(name + ": item: " + item.toString());
+            T item = queue.poll(3, TimeUnit.SECONDS);
+            if (item == null) {
+                System.out.println(name + ": no item to consume");
+            }
+            System.out.println(Thread.currentThread().getName() + " : " + name + ": item: " + item.toString());
             unlock();
             return null;
         }

@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
@@ -29,11 +30,10 @@ public class ParallelNaverClient<T, R> implements Runnable {
 
     private boolean stop = false;
 
-    public ParallelNaverClient(int parallel, BlockingQueue<T> inputQueue, ClientAction<T, R> function,
-                               BlockingQueue<R> outputQueue) {
+    public ParallelNaverClient(int parallel, BlockingQueue<T> inputQueue, ClientAction<T, R> function) {
         executorService = newFixedThreadPool(parallel);
         this.inputQueue = inputQueue;
-        this.outputQueue = outputQueue;
+        this.outputQueue = new LinkedBlockingQueue<>();
         this.runners = new NaverClientRunnerPool(parallel, this.inputQueue, function, outputQueue);
     }
 
@@ -41,8 +41,9 @@ public class ParallelNaverClient<T, R> implements Runnable {
      * Starts this ParallelNaverClient synchronously.
      * @throws Exception
      */
-    public void start() throws Exception {
+    public BlockingQueue<R> start() throws Exception {
         this.run();
+        return this.outputQueue;
     }
 
     /**

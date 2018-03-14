@@ -17,7 +17,7 @@ public class ParallelNaverClientTest {
     public void shouldClientDequeAllItemsFromInputs_andEnqueueToOutputs() throws Exception {
         //Given
         BlockingQueue<String> inputs = new LinkedBlockingQueue<>();
-        BlockingQueue<String> outputs = new LinkedBlockingQueue<>();
+        BlockingQueue<String> outputs;
 
         for (int i = 0; i < 1000; i++) {
             inputs.add(String.valueOf(i));
@@ -25,9 +25,8 @@ public class ParallelNaverClientTest {
         ClientAction<String, String> function = (s, client) -> s;
 
         //When
-        ParallelNaverClient<String, String> parallelNaverClient = new ParallelNaverClient<>(3, inputs,
-                function, outputs);
-        parallelNaverClient.start();
+        ParallelNaverClient<String, String> parallelNaverClient = new ParallelNaverClient<>(3, inputs, function);
+        outputs = parallelNaverClient.start();
 
         //Then
         if (!inputs.isEmpty()) {
@@ -48,8 +47,7 @@ public class ParallelNaverClientTest {
             inputs.add(String.valueOf(i));
         }
         ClientAction<String, String> function = (s, client) -> s;
-        ParallelNaverClient<String, String> parallelNaverClient = new ParallelNaverClient<>(3, inputs,
-                function, outputs);
+        ParallelNaverClient<String, String> parallelNaverClient = new ParallelNaverClient<>(3, inputs, function);
 
         //When
         Stream<String> stringStream = parallelNaverClient.startAsynchronously();

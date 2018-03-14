@@ -20,10 +20,10 @@ public class NaverClientRunner<I, R> implements Callable {
     private BlockingQueue<I> queue;
     private AtomicInteger lock = new AtomicInteger(0);
 
-    public NaverClientRunner(BlockingQueue<I> queue, String NAME, ClientAction<I, R> function,
+    public NaverClientRunner(BlockingQueue<I> queue, String name, ClientAction<I, R> function,
                              BlockingQueue<R> outputQueue) {
         this.queue = queue;
-        this.NAME = NAME;
+        this.NAME = name;
         this.function = function;
         this.outputQueue = outputQueue;
     }
@@ -32,7 +32,7 @@ public class NaverClientRunner<I, R> implements Callable {
         return lock.compareAndSet(0, 1);
     }
 
-    public void unlock() throws Exception {
+    public void unlock() {
         log.debug("{} is unlocked.", NAME);
         lock.compareAndSet(1, 0);
     }

@@ -21,7 +21,7 @@ public class NaverClientRunners<I, R> {
         log.debug("NaverClientRunner initialized");
     }
 
-    public NaverClientRunner pollAvailableClient() {
+    public NaverClientRunner pollAvailableClientRunner() throws InterruptedException {
         log.debug("waiting for runner");
         while (true) {
             for (NaverClientRunner runner : clientRunners) {

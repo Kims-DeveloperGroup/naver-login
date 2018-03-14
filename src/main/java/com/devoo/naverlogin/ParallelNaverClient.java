@@ -55,17 +55,17 @@ public class ParallelNaverClient<T, R> implements Runnable {
     public void run() {
         long start = System.currentTimeMillis();
         while (true) {
-            NaverClientRunner naverClientRunner = runners.pollAvailableClient();
-            executorService.submit(naverClientRunner);
-            if (this.inputQueue.isEmpty() || this.stop) {
-                log.info("Stopping....{} items remain", this.inputQueue.size());
-                try {
+            try {
+                NaverClientRunner naverClientRunner = runners.pollAvailableClientRunner();
+                executorService.submit(naverClientRunner);
+                if (this.inputQueue.isEmpty() || this.stop) {
+                    log.info("Stopping....{} items remain", this.inputQueue.size());
                     executorService.awaitTermination(3, TimeUnit.SECONDS);
                     runners.terminate();
-                } catch (InterruptedException e) {
                     break;
                 }
-                break;
+            } catch (InterruptedException e) {
+                log.error("Exception occurred while running NaverClientRunners: ", e);
             }
         }
         long end = System.currentTimeMillis();

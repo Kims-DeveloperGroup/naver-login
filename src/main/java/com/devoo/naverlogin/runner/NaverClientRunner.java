@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class NaverClientRunner<I, R> implements Callable {
     private static final Logger log = LoggerFactory.getLogger(ParallelNaverClient.class);
@@ -18,7 +18,7 @@ public class NaverClientRunner<I, R> implements Callable {
     private final BlockingQueue<R> outputQueue;
     private NaverClient naverClient = new NaverClient();
     private BlockingQueue<I> queue;
-    private AtomicInteger lock = new AtomicInteger(0);
+    private ReentrantLock reentrantLock = new ReentrantLock();
 
     public NaverClientRunner(BlockingQueue<I> queue, String NAME, ClientAction<I, R> function,
                              BlockingQueue<R> outputQueue) {
@@ -28,16 +28,13 @@ public class NaverClientRunner<I, R> implements Callable {
         this.outputQueue = outputQueue;
     }
 
-    public boolean lockIfAvailable() {
-        return lock.compareAndSet(0, 1);
+    public boolean lockIfAvailable() throws InterruptedException {
+        return reentrantLock.tryLock();
     }
 
     public void unlock() throws Exception {
-        if (lock.compareAndSet(1, 0)) {
-            log.debug("{} is unlocked.", NAME);
-        } else {
-            throw new Exception("Unlock exception: " + NAME);
-        }
+        reentrantLock.unlock();
+        log.debug("{} is unlocked.", NAME);
     }
 
     public void terminate() {

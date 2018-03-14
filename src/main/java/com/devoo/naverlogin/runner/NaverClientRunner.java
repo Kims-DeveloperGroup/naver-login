@@ -1,6 +1,9 @@
 package com.devoo.naverlogin.runner;
 
 import com.devoo.naverlogin.NaverClient;
+import com.devoo.naverlogin.ParallelNaverClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
@@ -8,6 +11,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class NaverClientRunner<I, R> implements Callable {
+    private static final Logger log = LoggerFactory.getLogger(ParallelNaverClient.class);
+
     public final String NAME;
     private final ClientAction<I, R> function;
     private final BlockingQueue<R> outputQueue;
@@ -27,29 +32,29 @@ public class NaverClientRunner<I, R> implements Callable {
         return lock.compareAndSet(0, 1);
     }
 
-    public void unlock() {
+    public void unlock() throws Exception {
         if (lock.compareAndSet(1, 0)) {
-            System.out.println(NAME + " is unlocked.");
+            log.debug("{} is unlocked.", NAME);
         } else {
-            System.out.println(NAME + " is already unlocked. wtf");
+            throw new Exception("Unlock exception: " + NAME);
         }
     }
 
     public void terminate() {
         naverClient.getWebDriver().close();
-        System.out.println(NAME + " terminated.");
+        log.debug("{} terminated.", NAME);
     }
 
     @Override
     public R call() throws Exception {
         I item = queue.poll(3, TimeUnit.SECONDS);
         if (item == null) {
-            System.out.println(NAME + ": no item to consume");
+            log.debug("{} : no item to consume", NAME);
             return null;
         }
         R result = function.apply(item, naverClient);
         outputQueue.offer(result);
-        System.out.println(Thread.currentThread().getName() + " : " + NAME + ": item: " + item.toString());
+        log.debug("{} :  {}: {}", Thread.currentThread().getName(), NAME, item.toString());
         unlock();
         return result;
     }

@@ -3,6 +3,8 @@ package com.devoo.naverlogin;
 import com.devoo.naverlogin.runner.ClientAction;
 import com.devoo.naverlogin.runner.NaverClientRunner;
 import com.devoo.naverlogin.runner.NaverClientRunners;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -11,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 
 public class ParallelNaverClient<T, R> implements Runnable {
+    private static final Logger log = LoggerFactory.getLogger(ParallelNaverClient.class);
     private final ExecutorService executorService;
     private final NaverClientRunners<T, R> runners;
     private BlockingQueue<T> inputQueue;
@@ -33,7 +36,7 @@ public class ParallelNaverClient<T, R> implements Runnable {
     }
 
     public void stop() {
-        System.out.println("sent stop request.");
+        log.info("sent stop request.");
         this.stop = true;
     }
 
@@ -44,7 +47,7 @@ public class ParallelNaverClient<T, R> implements Runnable {
             NaverClientRunner naverClientRunner = runners.pollAvailableClient();
             executorService.submit(naverClientRunner);
             if (this.inputQueue.isEmpty() || this.stop) {
-                System.out.println("Stopping....:" + this.inputQueue.size() + " items remain");
+                log.info("Stopping....{} items remain", this.inputQueue.size());
                 try {
                     executorService.awaitTermination(3, TimeUnit.SECONDS);
                     runners.terminate();
@@ -56,6 +59,6 @@ public class ParallelNaverClient<T, R> implements Runnable {
         }
         long end = System.currentTimeMillis();
         long duration = (end - start) / 1000;
-        System.out.println("시간: " + duration + " 초");
+        log.info("시간: {} 초", duration);
     }
 }

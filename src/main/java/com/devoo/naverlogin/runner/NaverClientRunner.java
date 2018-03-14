@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class NaverClientRunner<I, R> implements Callable {
     private static final Logger log = LoggerFactory.getLogger(ParallelNaverClient.class);
@@ -18,7 +18,7 @@ public class NaverClientRunner<I, R> implements Callable {
     private final BlockingQueue<R> outputQueue;
     private NaverClient naverClient = new NaverClient();
     private BlockingQueue<I> queue;
-    private ReentrantLock reentrantLock = new ReentrantLock();
+    private AtomicInteger lock = new AtomicInteger(0);
 
     public NaverClientRunner(BlockingQueue<I> queue, String NAME, ClientAction<I, R> function,
                              BlockingQueue<R> outputQueue) {
@@ -29,12 +29,12 @@ public class NaverClientRunner<I, R> implements Callable {
     }
 
     public boolean lockIfAvailable() throws InterruptedException {
-        return reentrantLock.tryLock();
+        return lock.compareAndSet(0, 1);
     }
 
     public void unlock() throws Exception {
-        reentrantLock.unlock();
         log.debug("{} is unlocked.", NAME);
+        lock.compareAndSet(1, 0);
     }
 
     public void terminate() {
@@ -47,6 +47,7 @@ public class NaverClientRunner<I, R> implements Callable {
         I item = queue.poll(3, TimeUnit.SECONDS);
         if (item == null) {
             log.debug("{} : no item to consume", NAME);
+            unlock();
             return null;
         }
         R result = function.apply(item, naverClient);

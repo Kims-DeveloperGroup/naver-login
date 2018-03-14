@@ -1,5 +1,6 @@
 package com.devoo.naverlogin;
 
+import com.devoo.naverlogin.exception.NoMoreOutputException;
 import com.devoo.naverlogin.runner.ClientAction;
 import com.devoo.naverlogin.runner.NaverClientRunner;
 import com.devoo.naverlogin.runner.NaverClientRunners;
@@ -38,7 +39,13 @@ public class ParallelNaverClient<T, R> implements Runnable {
         new Thread(this).start();
         return Stream.generate(() -> {
             try {
-                return this.outputQueue.take();
+                R item = this.outputQueue.poll(3L, TimeUnit.SECONDS);
+                if (item == null) {
+                    log.debug("No more item to supply");
+                    this.stop();
+                    throw new NoMoreOutputException();
+                }
+                return item;
             } catch (InterruptedException e) {
                 log.error("Exception occurred while consuming items : {}", e);
             }
@@ -46,9 +53,16 @@ public class ParallelNaverClient<T, R> implements Runnable {
         });
     }
 
-    public void stop() {
-        log.info("sent stop request.");
+    public void stop() throws InterruptedException {
+        if (this.stop) {
+            log.debug("Stop request has already been sent.");
+            return;
+        }
         this.stop = true;
+        log.info("Sent stop request.");
+        log.info("Stopping....{} items remain", this.inputQueue.size());
+        runners.terminate();
+        executorService.awaitTermination(3, TimeUnit.SECONDS);
     }
 
     @Override
@@ -58,10 +72,9 @@ public class ParallelNaverClient<T, R> implements Runnable {
             try {
                 NaverClientRunner naverClientRunner = runners.pollAvailableClientRunner();
                 executorService.submit(naverClientRunner);
-                if (this.inputQueue.isEmpty() || this.stop) {
-                    log.info("Stopping....{} items remain", this.inputQueue.size());
-                    executorService.awaitTermination(3, TimeUnit.SECONDS);
-                    runners.terminate();
+                if (this.inputQueue.isEmpty()) {
+                    log.debug("Input Queue is empty");
+                    stop();
                     break;
                 }
             } catch (InterruptedException e) {

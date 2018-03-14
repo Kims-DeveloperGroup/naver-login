@@ -49,7 +49,7 @@ public class ParallelNaverClientTest {
         //When
         ParallelNaverClient<String, String> parallelNaverClient = new ParallelNaverClient<>(1, inputs,
                 function, outputs);
-        parallelNaverClient.startAsyn();
+        parallelNaverClient.startAsynchronously();
         Thread.sleep(50);
         parallelNaverClient.stop();
         Thread.sleep(5000);

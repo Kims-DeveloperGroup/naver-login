@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import static java.util.concurrent.Executors.newFixedThreadPool;
 
@@ -17,6 +18,7 @@ public class ParallelNaverClient<T, R> implements Runnable {
     private final ExecutorService executorService;
     private final NaverClientRunners<T, R> runners;
     private BlockingQueue<T> inputQueue;
+    private final BlockingQueue<R> outputQueue;
 
     private boolean stop = false;
 
@@ -24,6 +26,7 @@ public class ParallelNaverClient<T, R> implements Runnable {
                                BlockingQueue<R> outputQueue) {
         executorService = newFixedThreadPool(parallel);
         this.inputQueue = inputQueue;
+        this.outputQueue = outputQueue;
         this.runners = new NaverClientRunners(parallel, this.inputQueue, function, outputQueue);
     }
 
@@ -31,8 +34,16 @@ public class ParallelNaverClient<T, R> implements Runnable {
         this.run();
     }
 
-    public void startAsyn() {
+    public Stream<R> startAsynchronously() {
         new Thread(this).start();
+        return Stream.generate(() -> {
+            try {
+                return this.outputQueue.take();
+            } catch (InterruptedException e) {
+                log.error("Exception occurred while consuming items : {}", e);
+            }
+            return null;
+        });
     }
 
     public void stop() {

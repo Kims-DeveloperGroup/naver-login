@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -16,7 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @param <I>
  * @param <R>
  */
-public class NaverClientRunner<I, R> implements Callable {
+public class NaverClientRunner<I, R> implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(ParallelNaverClient.class);
 
     public final String NAME;
@@ -52,21 +51,26 @@ public class NaverClientRunner<I, R> implements Callable {
      * Polls an item from the input queue and processes with the given ClientAction.
      * and offers an result item into the output queue.
      * Note: in case that no item is offered from the input queue in 3 seconds, null is returned.
+     *
      * @return
      * @throws Exception
      */
     @Override
-    public R call() throws Exception {
-        I item = queue.poll(3, TimeUnit.SECONDS);
-        if (item == null) {
-            log.debug("{} : no item to consume", NAME);
+    public void run() {
+        I item = null;
+        try {
+            item = queue.poll(3, TimeUnit.SECONDS);
+            if (item == null) {
+                log.debug("{} : no item to consume", NAME);
+                unlock();
+                return;
+            }
+            R result = function.apply(item, naverClient);
+            outputQueue.offer(result);
+            log.debug("{} :  {}: {}", Thread.currentThread().getName(), NAME, item.toString());
             unlock();
-            return null;
+        } catch (InterruptedException e) {
+            return;
         }
-        R result = function.apply(item, naverClient);
-        outputQueue.offer(result);
-        log.debug("{} :  {}: {}", Thread.currentThread().getName(), NAME, item.toString());
-        unlock();
-        return result;
     }
 }

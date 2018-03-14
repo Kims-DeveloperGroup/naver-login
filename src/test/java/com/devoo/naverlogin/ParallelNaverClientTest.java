@@ -1,10 +1,13 @@
 package com.devoo.naverlogin;
 
+import com.devoo.naverlogin.exception.NoMoreOutputException;
 import com.devoo.naverlogin.runner.ClientAction;
 import org.junit.Test;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.junit.Assert.fail;
 
@@ -35,7 +38,7 @@ public class ParallelNaverClientTest {
         }
     }
 
-    @Test
+    @Test(expected = NoMoreOutputException.class)
     public void shouldClientStopBeforeAllItemsAreConsumed() throws Exception {
         //Given
         BlockingQueue<String> inputs = new LinkedBlockingQueue<>();
@@ -45,21 +48,16 @@ public class ParallelNaverClientTest {
             inputs.add(String.valueOf(i));
         }
         ClientAction<String, String> function = (s, client) -> s;
+        ParallelNaverClient<String, String> parallelNaverClient = new ParallelNaverClient<>(3, inputs,
+                function, outputs);
 
         //When
-        ParallelNaverClient<String, String> parallelNaverClient = new ParallelNaverClient<>(1, inputs,
-                function, outputs);
-        parallelNaverClient.startAsynchronously();
-        Thread.sleep(50);
-        parallelNaverClient.stop();
-        Thread.sleep(5000);
+        Stream<String> stringStream = parallelNaverClient.startAsynchronously();
+        stringStream.collect(Collectors.toList());
 
         //Then
-        if (inputs.isEmpty()) {
+        if (!inputs.isEmpty()) {
             fail("all items are consumed.");
-        }
-        if (outputs.size() == 1000) {
-            fail("all items are produced.");
         }
     }
 }

@@ -3,7 +3,7 @@ package com.devoo.naverlogin;
 import com.devoo.naverlogin.exception.NoMoreOutputException;
 import com.devoo.naverlogin.runner.ClientAction;
 import com.devoo.naverlogin.runner.NaverClientRunner;
-import com.devoo.naverlogin.runner.NaverClientRunners;
+import com.devoo.naverlogin.runner.NaverClientRunnerPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,10 +14,16 @@ import java.util.stream.Stream;
 
 import static java.util.concurrent.Executors.newFixedThreadPool;
 
+/**
+ * Runs NaverClientRunnerPool and executes NaverClientRunner in multiple threads.
+ *
+ * @param <T>
+ * @param <R>
+ */
 public class ParallelNaverClient<T, R> implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(ParallelNaverClient.class);
     private final ExecutorService executorService;
-    private final NaverClientRunners<T, R> runners;
+    private final NaverClientRunnerPool<T, R> runners;
     private BlockingQueue<T> inputQueue;
     private final BlockingQueue<R> outputQueue;
 
@@ -28,13 +34,21 @@ public class ParallelNaverClient<T, R> implements Runnable {
         executorService = newFixedThreadPool(parallel);
         this.inputQueue = inputQueue;
         this.outputQueue = outputQueue;
-        this.runners = new NaverClientRunners(parallel, this.inputQueue, function, outputQueue);
+        this.runners = new NaverClientRunnerPool(parallel, this.inputQueue, function, outputQueue);
     }
 
+    /**
+     * Starts this ParallelNaverClient synchronously.
+     * @throws Exception
+     */
     public void start() throws Exception {
         this.run();
     }
 
+    /**
+     * Starts this ParallelNaverClient asynchronously and returns stream of outputs.
+     * @return
+     */
     public Stream<R> startAsynchronously() {
         new Thread(this).start();
         return Stream.generate(() -> {
@@ -78,7 +92,7 @@ public class ParallelNaverClient<T, R> implements Runnable {
                     break;
                 }
             } catch (InterruptedException e) {
-                log.error("Exception occurred while running NaverClientRunners: ", e);
+                log.error("Exception occurred while running NaverClientRunnerPool: ", e);
             }
         }
         long end = System.currentTimeMillis();

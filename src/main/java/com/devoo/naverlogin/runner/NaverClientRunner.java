@@ -10,6 +10,12 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Runs a NaverClient with an injected function.
+ *
+ * @param <I>
+ * @param <R>
+ */
 public class NaverClientRunner<I, R> implements Callable {
     private static final Logger log = LoggerFactory.getLogger(ParallelNaverClient.class);
 
@@ -42,6 +48,13 @@ public class NaverClientRunner<I, R> implements Callable {
         log.debug("{} terminated.", NAME);
     }
 
+    /**
+     * Polls an item from the input queue and processes with the given ClientAction.
+     * and offers an result item into the output queue.
+     * Note: in case that no item is offered from the input queue in 3 seconds, null is returned.
+     * @return
+     * @throws Exception
+     */
     @Override
     public R call() throws Exception {
         I item = queue.poll(3, TimeUnit.SECONDS);

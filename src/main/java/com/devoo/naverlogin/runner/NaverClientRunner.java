@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Runs a NaverClient with an injected function.
+ * Runs a NaverClient with an injected clientAction.
  *
  * @param <I>
  * @param <R>
@@ -19,17 +19,17 @@ public class NaverClientRunner<I, R> implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(ParallelNaverClient.class);
 
     public final String NAME;
-    private final ClientAction<I, R> function;
+    private final ClientAction<I, R> clientAction;
     private final BlockingQueue<R> outputQueue;
     private NaverClient naverClient = new NaverClient();
-    private BlockingQueue<I> queue;
+    private BlockingQueue<I> inputQueue;
     private AtomicInteger lock = new AtomicInteger(0);
 
-    public NaverClientRunner(BlockingQueue<I> queue, String name, ClientAction<I, R> function,
+    public NaverClientRunner(BlockingQueue<I> inputQueue, String name, ClientAction<I, R> clientAction,
                              BlockingQueue<R> outputQueue) {
-        this.queue = queue;
+        this.inputQueue = inputQueue;
         this.NAME = name;
-        this.function = function;
+        this.clientAction = clientAction;
         this.outputQueue = outputQueue;
     }
 
@@ -57,17 +57,17 @@ public class NaverClientRunner<I, R> implements Runnable {
      */
     @Override
     public void run() {
-        I item = null;
+        I inputItem = null;
         try {
-            item = queue.poll(3, TimeUnit.SECONDS);
-            if (item == null) {
+            inputItem = inputQueue.poll(3, TimeUnit.SECONDS);
+            if (inputItem == null) {
                 log.debug("{} : no item to consume", NAME);
                 unlock();
                 return;
             }
-            R result = function.apply(item, naverClient);
+            R result = clientAction.apply(inputItem, naverClient);
             outputQueue.offer(result);
-            log.debug("{} :  {}: {}", Thread.currentThread().getName(), NAME, item.toString());
+            log.debug("{} processed {}", NAME, inputItem.toString());
             unlock();
         } catch (InterruptedException e) {
             return;

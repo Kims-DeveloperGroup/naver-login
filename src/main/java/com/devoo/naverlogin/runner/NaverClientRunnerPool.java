@@ -20,20 +20,20 @@ public class NaverClientRunnerPool<I, R> {
     /**
      * @param clientRunnerCount the number of NaverClientRunner in the pool
      * @param inputQueue        input items queue to be processed
-     * @param function          a injected action of NaverClientRunner to do with an input item.
+     * @param clientAction          a injected action of NaverClientRunner to do with an input item.
      * @param outputQueue       a output items queue to be stored after processing.
      */
     public NaverClientRunnerPool(int clientRunnerCount, BlockingQueue<I> inputQueue,
-                                 ClientAction<I, R> function,
+                                 ClientAction<I, R> clientAction,
                                  BlockingQueue<R> outputQueue) {
         for (int count = 0; count < clientRunnerCount; count++) {
             this.clientRunners.add(new NaverClientRunner(inputQueue,
-                    "runner-" + count, function, outputQueue));
+                    "runner-" + count, clientAction, outputQueue));
         }
-        log.debug("NaverClientRunner initialized");
+        log.debug("NaverClientRunnerPool initialized");
     }
 
-    /**
+    /**s
      * Offers an available NaverClientRunner from the pool.
      * @return an available NaverClientRunner
      * @throws InterruptedException
@@ -52,7 +52,7 @@ public class NaverClientRunnerPool<I, R> {
     }
 
     /**
-     * Terminates all of NaverClientRunner
+     * Terminates all of NaverClientRunner in the pool
      */
     public void terminate() {
         clientRunners.forEach(runner -> runner.terminate());

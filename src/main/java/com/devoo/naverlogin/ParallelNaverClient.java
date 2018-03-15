@@ -24,17 +24,17 @@ import static java.util.concurrent.Executors.newFixedThreadPool;
 public class ParallelNaverClient<T, R> implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(ParallelNaverClient.class);
     private final ExecutorService executorService;
-    private final NaverClientRunnerPool<T, R> runners;
+    private final NaverClientRunnerPool<T, R> clientRunnerPool;
     private BlockingQueue<T> inputQueue;
     private final BlockingQueue<R> outputQueue;
 
     private boolean stop = false;
 
-    public ParallelNaverClient(int parallel, BlockingQueue<T> inputQueue, ClientAction<T, R> function) {
+    public ParallelNaverClient(int parallel, BlockingQueue<T> inputQueue, ClientAction<T, R> clientAction) {
         executorService = newFixedThreadPool(parallel);
         this.inputQueue = inputQueue;
         this.outputQueue = new LinkedBlockingQueue<>();
-        this.runners = new NaverClientRunnerPool(parallel, this.inputQueue, function, outputQueue);
+        this.clientRunnerPool = new NaverClientRunnerPool(parallel, this.inputQueue, clientAction, outputQueue);
     }
 
     /**
@@ -76,7 +76,7 @@ public class ParallelNaverClient<T, R> implements Runnable {
         this.stop = true;
         log.info("Sent stop request.");
         log.info("Stopping....{} items remain", this.inputQueue.size());
-        runners.terminate();
+        clientRunnerPool.terminate();
         executorService.awaitTermination(3, TimeUnit.SECONDS);
     }
 
@@ -85,7 +85,7 @@ public class ParallelNaverClient<T, R> implements Runnable {
         long start = System.currentTimeMillis();
         while (true) {
             try {
-                NaverClientRunner naverClientRunner = runners.pollAvailableClientRunner();
+                NaverClientRunner naverClientRunner = clientRunnerPool.pollAvailableClientRunner();
                 executorService.submit(naverClientRunner);
                 if (this.inputQueue.isEmpty()) {
                     log.debug("Input Queue is empty");

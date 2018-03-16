@@ -57,4 +57,8 @@ public class NaverClientRunnerPool<I, R> {
     public void terminate() {
         clientRunners.forEach(runner -> runner.terminate());
     }
+
+    public LinkedList<NaverClientRunner<I, R>> getClientRunners() {
+        return this.clientRunners;
+    }
 }

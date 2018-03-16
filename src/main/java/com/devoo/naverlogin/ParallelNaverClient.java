@@ -1,5 +1,6 @@
 package com.devoo.naverlogin;
 
+import com.devoo.naverlogin.exception.NaverLoginFailException;
 import com.devoo.naverlogin.exception.NoMoreOutputException;
 import com.devoo.naverlogin.runner.ClientAction;
 import com.devoo.naverlogin.runner.NaverClientRunner;
@@ -35,6 +36,16 @@ public class ParallelNaverClient<T, R> implements Runnable {
         this.inputQueue = inputQueue;
         this.outputQueue = new LinkedBlockingQueue<>();
         this.clientRunnerPool = new NaverClientRunnerPool(parallel, this.inputQueue, clientAction, outputQueue);
+    }
+
+    public void tryToLogin(String userId, String password) {
+        this.clientRunnerPool.getClientRunners().forEach(runner -> {
+            try {
+                runner.getNaverClient().tryLogin(userId, password);
+            } catch (NaverLoginFailException e) {
+                log.error("Login fail exception : {}", e);
+            }
+        });
     }
 
     /**

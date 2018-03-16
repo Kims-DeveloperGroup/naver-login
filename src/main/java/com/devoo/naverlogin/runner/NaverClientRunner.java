@@ -73,4 +73,8 @@ public class NaverClientRunner<I, R> implements Runnable {
             return;
         }
     }
+
+    public NaverClient getNaverClient() {
+        return this.naverClient;
+    }
 }

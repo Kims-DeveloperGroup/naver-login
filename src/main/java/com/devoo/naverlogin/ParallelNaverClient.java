@@ -19,23 +19,23 @@ import static java.util.concurrent.Executors.newFixedThreadPool;
 /**
  * Runs NaverClientRunnerPool and executes NaverClientRunner in multiple threads.
  *
- * @param <T>
+ * @param <I>
  * @param <R>
  */
-public class ParallelNaverClient<T, R> implements Runnable {
+public class ParallelNaverClient<I, R> implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(ParallelNaverClient.class);
     private final ExecutorService executorService;
-    private final NaverClientRunnerPool<T, R> clientRunnerPool;
-    private BlockingQueue<T> inputQueue;
+    private final NaverClientRunnerPool<I, R> clientRunnerPool;
+    private BlockingQueue<I> inputQueue;
     private final BlockingQueue<R> outputQueue;
 
     private boolean stop = false;
 
-    public ParallelNaverClient(int parallel, BlockingQueue<T> inputQueue, ClientAction<T, R> clientAction) {
+    public ParallelNaverClient(int parallel) {
         executorService = newFixedThreadPool(parallel);
-        this.inputQueue = inputQueue;
+        this.inputQueue = new LinkedBlockingQueue<>();
         this.outputQueue = new LinkedBlockingQueue<>();
-        this.clientRunnerPool = new NaverClientRunnerPool(parallel, this.inputQueue, clientAction, outputQueue);
+        this.clientRunnerPool = new NaverClientRunnerPool(parallel, outputQueue);
     }
 
     public void tryToLogin(String userId, String password) {
@@ -52,7 +52,8 @@ public class ParallelNaverClient<T, R> implements Runnable {
      * Starts this ParallelNaverClient synchronously.
      * @throws Exception
      */
-    public BlockingQueue<R> start() throws Exception {
+    public BlockingQueue<R> start(ClientAction<I, R> clientAction, BlockingQueue<I> inputQueue) throws Exception {
+        init(inputQueue, clientAction);
         this.run();
         return this.outputQueue;
     }
@@ -61,7 +62,8 @@ public class ParallelNaverClient<T, R> implements Runnable {
      * Starts this ParallelNaverClient asynchronously and returns stream of outputs.
      * @return
      */
-    public Stream<R> startAsynchronously() {
+    public Stream<R> startAsynchronously(ClientAction<I, R> clientAction, BlockingQueue<I> inputQueue) {
+        init(inputQueue, clientAction);
         new Thread(this).start();
         return Stream.generate(() -> {
             try {
@@ -77,6 +79,12 @@ public class ParallelNaverClient<T, R> implements Runnable {
             }
             return null;
         });
+    }
+
+    private void init(BlockingQueue<I> inputQueue, ClientAction<I, R> clientAction) {
+        this.inputQueue = inputQueue;
+        clientRunnerPool.setClientAction(clientAction);
+        clientRunnerPool.setInputQueue(inputQueue);
     }
 
     public void stop() throws InterruptedException {

@@ -19,17 +19,14 @@ public class NaverClientRunner<I, R> implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(ParallelNaverClient.class);
 
     public final String NAME;
-    private final ClientAction<I, R> clientAction;
+    private ClientAction<I, R> clientAction;
     private final BlockingQueue<R> outputQueue;
     private NaverClient naverClient = new NaverClient();
     private BlockingQueue<I> inputQueue;
     private AtomicInteger lock = new AtomicInteger(0);
 
-    public NaverClientRunner(BlockingQueue<I> inputQueue, String name, ClientAction<I, R> clientAction,
-                             BlockingQueue<R> outputQueue) {
-        this.inputQueue = inputQueue;
+    public NaverClientRunner(String name, BlockingQueue<R> outputQueue) {
         this.NAME = name;
-        this.clientAction = clientAction;
         this.outputQueue = outputQueue;
     }
 
@@ -76,5 +73,13 @@ public class NaverClientRunner<I, R> implements Runnable {
 
     public NaverClient getNaverClient() {
         return this.naverClient;
+    }
+
+    public void setInputQueue(BlockingQueue<I> inputQueue) {
+        this.inputQueue = inputQueue;
+    }
+
+    public void setClientAction(ClientAction<I, R> clientAction) {
+        this.clientAction = clientAction;
     }
 }

@@ -22,11 +22,11 @@ public class ParallelNaverClientTest {
         for (int i = 0; i < 1000; i++) {
             inputs.add(String.valueOf(i));
         }
-        ClientAction<String, String> function = (s, client) -> s;
+        ClientAction<String, String> clientAction = (s, client) -> s;
 
         //When
-        ParallelNaverClient<String, String> parallelNaverClient = new ParallelNaverClient<>(3, inputs, function);
-        outputs = parallelNaverClient.start();
+        ParallelNaverClient<String, String> parallelNaverClient = new ParallelNaverClient<>(3);
+        outputs = parallelNaverClient.start(clientAction, inputs);
 
         //Then
         if (!inputs.isEmpty()) {
@@ -38,19 +38,18 @@ public class ParallelNaverClientTest {
     }
 
     @Test(expected = NoMoreOutputException.class)
-    public void shouldClientStopBeforeAllItemsAreConsumed() throws Exception {
+    public void shouldClientThrowNoMoreItemException_whenRunningAsynchronously() throws Exception {
         //Given
         BlockingQueue<String> inputs = new LinkedBlockingQueue<>();
-        BlockingQueue<String> outputs = new LinkedBlockingQueue<>();
 
         for (int i = 0; i < 1000; i++) {
             inputs.add(String.valueOf(i));
         }
-        ClientAction<String, String> function = (s, client) -> s;
-        ParallelNaverClient<String, String> parallelNaverClient = new ParallelNaverClient<>(3, inputs, function);
+        ClientAction<String, String> clientAction = (s, client) -> s;
+        ParallelNaverClient<String, String> parallelNaverClient = new ParallelNaverClient<>(3);
 
         //When
-        Stream<String> stringStream = parallelNaverClient.startAsynchronously();
+        Stream<String> stringStream = parallelNaverClient.startAsynchronously(clientAction, inputs);
         stringStream.collect(Collectors.toList());
 
         //Then

@@ -47,13 +47,12 @@ public class NaverClient extends WebDriverUtilClient {
     }
 
     public boolean isLoginSucceeded() {
-        if (!this.webDriver.getCurrentUrl().equals(NAVER_HOME_URL)) {
-            log.debug("The current url is not home: {}", this.webDriver.getCurrentUrl());
-            return false;
-        }
-        new WebDriverWait(this.webDriver, 3)
-                .until(ExpectedConditions.visibilityOfElementLocated(By.className(LOGIN_USERINFO_ELEMENT_CLASSNAME)));
+        new WebDriverWait(this.webDriver, 10)
+                .until(ExpectedConditions.urlToBe(NAVER_HOME_URL));
+
         try {
+            new WebDriverWait(this.webDriver, 10)
+                    .until(ExpectedConditions.visibilityOfElementLocated(By.className(LOGIN_USERINFO_ELEMENT_CLASSNAME)));
             String classNameOfLoginElement =
                     webDriver.findElement(By.id("account")).getAttribute("class");
             if (classNameOfLoginElement.equals(LOGIN_USERINFO_ELEMENT_CLASSNAME)) {

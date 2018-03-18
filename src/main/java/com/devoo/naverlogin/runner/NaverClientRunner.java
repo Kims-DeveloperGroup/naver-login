@@ -56,7 +56,7 @@ public class NaverClientRunner<I, R> implements Runnable {
     public void run() {
         I inputItem = null;
         try {
-            inputItem = inputQueue.poll(3, TimeUnit.SECONDS);
+            inputItem = inputQueue.poll(10, TimeUnit.SECONDS);
             if (inputItem == null) {
                 log.debug("{} : no item to consume", NAME);
                 unlock();

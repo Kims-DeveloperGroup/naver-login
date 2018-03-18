@@ -12,7 +12,8 @@ public class NaverClient extends WebDriverUtilClient {
     static final String LOGIN_USERINFO_ELEMENT_CLASSNAME = "section_minime";
 
     private final String NAVER_HOME_URL = "https://www.naver.com/";
-    private final String LOGIN_BUTTON_SELECTOR = "#frmNIDLogin fieldset .btn_login input";
+    private final String NAVER_LOGIN_PAGE_URL = "https://nid.naver.com/nidlogin.login";
+    private final String LOGIN_BUTTON_SELECTOR = "#frmNIDLogin fieldset .btn_global";
     private String LOGIN_FORM_ID = "frmNIDLogin";
     private WebDriver webDriver;
 
@@ -27,7 +28,7 @@ public class NaverClient extends WebDriverUtilClient {
     }
 
     public NaverClient tryLogin(String id, String password) throws NaverLoginFailException {
-        this.webDriver.get(NAVER_HOME_URL);
+        this.webDriver.get(NAVER_LOGIN_PAGE_URL);
         new WebDriverWait(this.webDriver, 5)
                 .until(ExpectedConditions.visibilityOfElementLocated(By.id(LOGIN_FORM_ID)));
         this.webDriver.findElement(By.id("id")).sendKeys(id);
@@ -40,6 +41,11 @@ public class NaverClient extends WebDriverUtilClient {
     }
 
     public boolean isLoginSucceeded() {
+        new WebDriverWait(this.webDriver, 3)
+                .until(ExpectedConditions.visibilityOfElementLocated(By.className(LOGIN_USERINFO_ELEMENT_CLASSNAME)));
+        if (!this.webDriver.getCurrentUrl().equals(NAVER_HOME_URL)) {
+            return false;
+        }
         try {
             String classNameOfLoginElement =
                     webDriver.findElement(By.id("account")).getAttribute("class");

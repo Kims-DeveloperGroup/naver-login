@@ -38,10 +38,9 @@ public class ParallelNaverClientTest {
     }
 
     @Test(expected = NoMoreOutputException.class)
-    public void shouldClientStopBeforeAllItemsAreConsumed() throws Exception {
+    public void shouldClientThrowNoMoreItemException_whenRunningAsynchronously() throws Exception {
         //Given
         BlockingQueue<String> inputs = new LinkedBlockingQueue<>();
-        BlockingQueue<String> outputs = new LinkedBlockingQueue<>();
 
         for (int i = 0; i < 1000; i++) {
             inputs.add(String.valueOf(i));

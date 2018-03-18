@@ -33,7 +33,6 @@ public class ParallelNaverClient<I, R> implements Runnable {
 
     public ParallelNaverClient(int parallel) {
         executorService = newFixedThreadPool(parallel);
-        this.inputQueue = new LinkedBlockingQueue<>();
         this.outputQueue = new LinkedBlockingQueue<>();
         this.clientRunnerPool = new NaverClientRunnerPool(parallel, outputQueue);
     }

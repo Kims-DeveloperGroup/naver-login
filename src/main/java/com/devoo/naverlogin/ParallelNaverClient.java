@@ -52,7 +52,7 @@ public class ParallelNaverClient<I, R> implements Runnable {
      * Starts this ParallelNaverClient synchronously.
      * @throws Exception
      */
-    public BlockingQueue<R> start(ClientAction<I, R> clientAction, BlockingQueue<I> inputQueue) throws Exception {
+    public BlockingQueue<R> start(ClientAction<I, R> clientAction, BlockingQueue<I> inputQueue) {
         init(inputQueue, clientAction);
         this.run();
         return this.outputQueue;
@@ -81,6 +81,12 @@ public class ParallelNaverClient<I, R> implements Runnable {
         });
     }
 
+    /**
+     * Initializes necessary properties and resources before starting a client.
+     *
+     * @param inputQueue   input items
+     * @param clientAction action of NaverClientRunner to do with an input item.
+     */
     private void init(BlockingQueue<I> inputQueue, ClientAction<I, R> clientAction) {
         this.inputQueue = inputQueue;
         clientRunnerPool.setClientAction(clientAction);

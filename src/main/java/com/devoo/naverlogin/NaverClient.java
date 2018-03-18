@@ -64,4 +64,8 @@ public class NaverClient extends WebDriverUtilClient {
         }
         return false;
     }
+
+    public void terminate() {
+        this.webDriver.quit();
+    }
 }

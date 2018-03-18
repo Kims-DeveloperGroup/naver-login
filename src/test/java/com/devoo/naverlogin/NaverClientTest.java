@@ -30,6 +30,9 @@ public class NaverClientTest {
         //Then
         assertEquals(webDriver.findElement(By.id("account"))
                 .getAttribute("class"), NaverClient.LOGIN_USERINFO_ELEMENT_CLASSNAME);
+
+        //clean test
+        naverClient.terminate();
     }
 
     @Test(expected = NaverLoginFailException.class)
@@ -56,6 +59,9 @@ public class NaverClientTest {
         //Then
         assertEquals(webDriver.findElement(By.id("account"))
                 .getAttribute("class"), loginUserInfoElementClassName);
+
+        //clean test
+        naverClient.terminate();
     }
 
     @Test
@@ -66,5 +72,8 @@ public class NaverClientTest {
         Document da_iframe_rolling = naverClient.getIframe(naverMainUrl, "da_iframe_rolling");
         //then
         assertNotNull(da_iframe_rolling.body());
+
+        //clean test
+        naverClient.terminate();
     }
 }

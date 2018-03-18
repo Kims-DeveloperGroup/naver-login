@@ -66,7 +66,7 @@ public class ParallelNaverClient<I, R> implements Runnable {
         new Thread(this).start();
         return Stream.generate(() -> {
             try {
-                R item = this.outputQueue.poll(3L, TimeUnit.SECONDS);
+                R item = this.outputQueue.poll(100L, TimeUnit.SECONDS);
                 if (item == null) {
                     log.debug("No more item to supply");
                     this.stop();

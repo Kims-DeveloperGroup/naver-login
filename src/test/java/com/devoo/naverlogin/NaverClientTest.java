@@ -22,7 +22,6 @@ public class NaverClientTest {
     public void shouldBeLoginUserInfoSectionFound_whenLoginSucceeds() throws NaverLoginFailException {
         //Given
         NaverClient naverClient = new NaverClient();
-        String loginUserInfoElementClassName = "section_minime";
 
         //When
         WebDriver webDriver = naverClient.tryLogin(ID, PASSWORD).getWebDriver();

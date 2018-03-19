@@ -48,17 +48,8 @@ public class ParallelNaverClient<I, R> implements Runnable {
     }
 
     /**
-     * Starts this ParallelNaverClient synchronously.
-     * @throws Exception
-     */
-    public BlockingQueue<R> start(ClientAction<I, R> clientAction, BlockingQueue<I> inputQueue) {
-        init(inputQueue, clientAction);
-        this.run();
-        return this.outputQueue;
-    }
-
-    /**
      * Starts this ParallelNaverClient asynchronously and returns stream of outputs.
+     *
      * @return
      */
     public Stream<R> startAsynchronously(ClientAction<I, R> clientAction, BlockingQueue<I> inputQueue) {
@@ -66,11 +57,14 @@ public class ParallelNaverClient<I, R> implements Runnable {
         new Thread(this).start();
         return Stream.generate(() -> {
             try {
-                R item = this.outputQueue.poll(100L, TimeUnit.SECONDS);
-                if (item == null) {
-                    log.debug("No more item to supply");
-                    this.stop();
-                    throw new NoMoreOutputException();
+                R item = null;
+                while (item == null) {
+                    log.debug("Polling the output queue. queue size: {}", this.outputQueue.size());
+                    item = this.outputQueue.poll(10L, TimeUnit.SECONDS);
+                    if (this.stop && item == null) {
+                        log.debug("Stop supplying...");
+                        throw new NoMoreOutputException();
+                    }
                 }
                 return item;
             } catch (InterruptedException e) {
@@ -98,9 +92,9 @@ public class ParallelNaverClient<I, R> implements Runnable {
             return;
         }
         this.stop = true;
-        log.info("Sent stop request.");
-        log.info("Stopping....{} items remain", this.inputQueue.size());
+        log.info("Sent stop request. {} items remain", this.inputQueue.size());
         clientRunnerPool.terminate();
+        log.debug("Stopping....executorService");
         executorService.awaitTermination(3, TimeUnit.SECONDS);
     }
 
@@ -111,9 +105,8 @@ public class ParallelNaverClient<I, R> implements Runnable {
             try {
                 NaverClientRunner naverClientRunner = clientRunnerPool.pollAvailableClientRunner();
                 executorService.submit(naverClientRunner);
-                if (this.inputQueue.isEmpty()) {
-                    log.debug("Input Queue is empty");
-                    stop();
+                if (this.stop) {
+                    log.debug("Stop submitting runners.");
                     break;
                 }
             } catch (InterruptedException e) {

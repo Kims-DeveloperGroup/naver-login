@@ -63,8 +63,8 @@ public class NaverClientRunner<I, R> implements Runnable {
                 return;
             }
             R result = clientAction.apply(inputItem, naverClient);
-            outputQueue.offer(result);
-            log.debug("{} processed {}", NAME, inputItem.toString());
+            outputQueue.put(result);
+            log.debug("{} processed {} outputQueue size: {}", NAME, inputItem.toString(), this.outputQueue.size());
             unlock();
         } catch (InterruptedException e) {
             return;

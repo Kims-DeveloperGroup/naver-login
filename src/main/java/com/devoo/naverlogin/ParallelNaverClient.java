@@ -66,13 +66,13 @@ public class ParallelNaverClient<I, R> implements Runnable {
         new Thread(this).start();
         return Stream.generate(() -> {
             try {
-                R item = this.outputQueue.poll(100L, TimeUnit.SECONDS);
+                R item = this.outputQueue.poll(10L, TimeUnit.SECONDS);
                 if (item == null) {
                     while (item == null) {
                         log.debug("Output queue is not empty, size: {}", this.outputQueue.size());
-                        item = this.outputQueue.poll(10L, TimeUnit.SECONDS);
+                        item = this.outputQueue.poll(5L, TimeUnit.SECONDS);
                         if (this.stop) {
-                            log.debug("Stop supplying...s");
+                            log.debug("Stop supplying...");
                             throw new NoMoreOutputException();
                         }
                     }
@@ -118,7 +118,6 @@ public class ParallelNaverClient<I, R> implements Runnable {
                 executorService.submit(naverClientRunner);
                 if (this.inputQueue.isEmpty()) {
                     log.debug("Input Queue is empty");
-                    stop();
                     break;
                 }
             } catch (InterruptedException e) {

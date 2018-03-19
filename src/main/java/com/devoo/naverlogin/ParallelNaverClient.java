@@ -49,6 +49,7 @@ public class ParallelNaverClient<I, R> implements Runnable {
 
     /**
      * Starts this ParallelNaverClient asynchronously and returns stream of outputs.
+     *
      * @return
      */
     public Stream<R> startAsynchronously(ClientAction<I, R> clientAction, BlockingQueue<I> inputQueue) {
@@ -56,15 +57,13 @@ public class ParallelNaverClient<I, R> implements Runnable {
         new Thread(this).start();
         return Stream.generate(() -> {
             try {
-                R item = this.outputQueue.poll(10L, TimeUnit.SECONDS);
-                if (item == null) {
-                    while (item == null) {
-                        log.debug("Output queue is empty, size: {}", this.outputQueue.size());
-                        item = this.outputQueue.poll(5L, TimeUnit.SECONDS);
-                        if (this.stop) {
-                            log.debug("Stop supplying...");
-                            throw new NoMoreOutputException();
-                        }
+                R item = null;
+                while (item == null) {
+                    log.debug("Polling the output queue. queue size: {}", this.outputQueue.size());
+                    item = this.outputQueue.poll(10L, TimeUnit.SECONDS);
+                    if (this.stop && item == null) {
+                        log.debug("Stop supplying...");
+                        throw new NoMoreOutputException();
                     }
                 }
                 return item;

@@ -26,5 +26,8 @@ public class ParallelNaverClientTest {
         Stream<String> stringStream = parallelNaverClient.startAsynchronously(clientAction, inputs);
         Thread.sleep(3000L);
         parallelNaverClient.stop();
+
+        //Then
+        //Exception thrown
     }
 }

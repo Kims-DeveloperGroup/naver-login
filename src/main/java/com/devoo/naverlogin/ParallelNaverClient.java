@@ -59,7 +59,7 @@ public class ParallelNaverClient<I, R> implements Runnable {
                 R item = this.outputQueue.poll(10L, TimeUnit.SECONDS);
                 if (item == null) {
                     while (item == null) {
-                        log.debug("Output queue is not empty, size: {}", this.outputQueue.size());
+                        log.debug("Output queue is empty, size: {}", this.outputQueue.size());
                         item = this.outputQueue.poll(5L, TimeUnit.SECONDS);
                         if (this.stop) {
                             log.debug("Stop supplying...");
@@ -93,9 +93,9 @@ public class ParallelNaverClient<I, R> implements Runnable {
             return;
         }
         this.stop = true;
-        log.info("Sent stop request.");
-        log.info("Stopping....{} items remain", this.inputQueue.size());
+        log.info("Sent stop request. {} items remain", this.inputQueue.size());
         clientRunnerPool.terminate();
+        log.debug("Stopping....executorService");
         executorService.awaitTermination(3, TimeUnit.SECONDS);
     }
 

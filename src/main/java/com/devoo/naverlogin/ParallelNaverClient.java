@@ -48,16 +48,6 @@ public class ParallelNaverClient<I, R> implements Runnable {
     }
 
     /**
-     * Starts this ParallelNaverClient synchronously.
-     * @throws Exception
-     */
-    public BlockingQueue<R> start(ClientAction<I, R> clientAction, BlockingQueue<I> inputQueue) {
-        init(inputQueue, clientAction);
-        this.run();
-        return this.outputQueue;
-    }
-
-    /**
      * Starts this ParallelNaverClient asynchronously and returns stream of outputs.
      * @return
      */
@@ -116,8 +106,8 @@ public class ParallelNaverClient<I, R> implements Runnable {
             try {
                 NaverClientRunner naverClientRunner = clientRunnerPool.pollAvailableClientRunner();
                 executorService.submit(naverClientRunner);
-                if (this.inputQueue.isEmpty()) {
-                    log.debug("Input Queue is empty");
+                if (this.stop) {
+                    log.debug("Stop submitting runners.");
                     break;
                 }
             } catch (InterruptedException e) {

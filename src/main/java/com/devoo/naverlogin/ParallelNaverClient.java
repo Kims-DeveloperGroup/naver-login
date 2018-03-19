@@ -68,9 +68,14 @@ public class ParallelNaverClient<I, R> implements Runnable {
             try {
                 R item = this.outputQueue.poll(100L, TimeUnit.SECONDS);
                 if (item == null) {
-                    log.debug("No more item to supply");
-                    this.stop();
-                    throw new NoMoreOutputException();
+                    while (item == null) {
+                        log.debug("Output queue is not empty, size: {}", this.outputQueue.size());
+                        item = this.outputQueue.poll(10L, TimeUnit.SECONDS);
+                        if (this.stop) {
+                            log.debug("Stop supplying...s");
+                            throw new NoMoreOutputException();
+                        }
+                    }
                 }
                 return item;
             } catch (InterruptedException e) {

@@ -1,3 +1,5 @@
+# The project has been closed as the current version does not work at all with the current version of naver.
+
 # naver-login
 ###  This project **enables naver login session**, and **facilitates page access, which requires user-login.**
 
